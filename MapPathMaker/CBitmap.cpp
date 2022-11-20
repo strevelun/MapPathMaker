@@ -1,4 +1,5 @@
 #include "CBitmap.h"
+#include "CSprite.h"
 #include "framework.h"
 
 CBitmap::CBitmap(HWND hWnd, LPCWSTR fileName)
@@ -10,6 +11,8 @@ CBitmap::CBitmap(HWND hWnd, LPCWSTR fileName)
         CloseHandle(m_hFile);
         return;
     }
+
+    m_sprites = new CSprite[16];
 
     HDC hdc = GetDC(hWnd);
     BITMAPFILEHEADER    bmFileHeader;
@@ -30,6 +33,20 @@ CBitmap::CBitmap(HWND hWnd, LPCWSTR fileName)
     m_hMemDC = CreateCompatibleDC(hdc);
     SelectObject(m_hMemDC, m_bitmap);
 
+    int x = 10, y = 12;
+
+    // 10, 12, width/height:63
+    // 10, 90, 170, 250 => АЃАн 80 (width)
+    // 12, 92, 172, 252
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            m_sprites[(i * 4) + j] = CSprite(x + (j * 80), y + (i * 80), 64, 64);
+
     ReleaseDC(hWnd, hdc);
     CloseHandle(m_hFile);
+}
+
+CSprite CBitmap::GetSprites(int idx)
+{
+    return m_sprites[idx];
 }

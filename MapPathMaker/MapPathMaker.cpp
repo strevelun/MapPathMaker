@@ -3,6 +3,7 @@
 
 #include "framework.h"
 #include "MapPathMaker.h"
+#include "CBitmap.h"
 
 #define MAX_LOADSTRING 100
 
@@ -16,6 +17,8 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -123,8 +126,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static CBitmap bitmap(hWnd, L"image.bmp");
+    static CDC cdc(&bitmap);
+    static int idx = 0;
+
     switch (message)
     {
+    case WM_CREATE:
+        SetTimer(hWnd, 0, 1000, NULL);
+        break;
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -142,15 +153,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
+    case WM_TIMER:
+        InvalidateRgn(hWnd, NULL, true);
+        break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            EndPaint(hWnd, &ps);
+            cdc.RenderSprite(hWnd, 100, 100, idx++ % 16);
         }
         break;
     case WM_DESTROY:
+        KillTimer(hWnd, 0);
         PostQuitMessage(0);
         break;
     default:

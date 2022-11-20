@@ -3,14 +3,16 @@
 #include "framework.h"
 
 class CBitmap;
+class CSprite;
 
 class CDC
 {
-	HDC m_hDC;
+	CBitmap* m_bitmap;
 
 public:
-	CDC(HDC hdc) : m_hDC(hdc) {}
+	CDC(CBitmap* bitmap);
 
-	void Render(const CBitmap& bitmap);
-	void Render(const CBitmap& bitmap, long dx, long dy, float multiple);
+	void Render(HWND hWnd);
+	void Render(HWND hWnd, long dx, long dy, float multiple);
+	void RenderSprite(HWND hWnd, int x, int y, int idx);
 };

@@ -127,12 +127,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CBitmap.h" />
+    <ClInclude Include="CDC.h" />
+    <ClInclude Include="CSprite.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MapPathMaker.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CBitmap.cpp" />
+    <ClCompile Include="CDC.cpp" />
+    <ClCompile Include="CSprite.cpp" />
     <ClCompile Include="MapPathMaker.cpp" />
   </ItemGroup>
   <ItemGroup>

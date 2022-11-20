@@ -14,9 +14,9 @@ public:
 		x(_x), y(_y), w(_w), h(_h), px(0), py(0)
 	{}
 
-	void Render(HDC dc, const CBitmap& bitmap) 
-	{
-		BitBlt(dc, 0, 0, w, h, bitmap.GetMemDC(), x, y, SRCCOPY);
-	}
+	int GetX() const { return x; }
+	int GetY() const { return y; }
+	int GetWidth() const { return w; }
+	int GetHeight() const { return h; }
 };
 
