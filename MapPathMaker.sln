@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapPathMaker", "MapPathMaker\MapPathMaker.vcxproj", "{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Debug|x64.ActiveCfg = Debug|x64
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Debug|x64.Build.0 = Debug|x64
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Debug|x86.ActiveCfg = Debug|Win32
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Debug|x86.Build.0 = Debug|Win32
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Release|x64.ActiveCfg = Release|x64
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Release|x64.Build.0 = Release|x64
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Release|x86.ActiveCfg = Release|Win32
+		{F6F08192-9B9F-4C82-9548-CB56B8C1F34C}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9D3303DE-0FBF-4B26-8AA0-7688CA176B7B}
+	EndGlobalSection
+EndGlobal
