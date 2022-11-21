@@ -14,5 +14,5 @@ public:
 
 	void Render(HWND hWnd);
 	void Render(HWND hWnd, long dx, long dy, float multiple);
-	void RenderSprite(HWND hWnd, int x, int y, int idx);
+	void RenderSprite(HDC hdc, int x, int y, int idx);
 };

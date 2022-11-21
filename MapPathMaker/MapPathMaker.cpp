@@ -6,6 +6,8 @@
 #include "CBitmap.h"
 
 #define MAX_LOADSTRING 100
+#define WIDTH           640
+#define HEIGHT          640
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -101,7 +103,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, WIDTH, HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -124,46 +126,67 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
 //
 //
+
+void InitMap(HDC hdc, CDC cdc)
+{
+    for(int i=0; i<(WIDTH / 64) - 1; i++)
+        for(int j=0; j<(HEIGHT / 64) - 1; j++)
+            cdc.RenderSprite(hdc, i * 64, j * 64, 15);
+}
+
+void PutRoad(CDC cdc, HDC hdc, int x, int y, int curTile)
+{
+    // 마우스 누른 위치 좌표에 해당하는 칸에 스프라이트 넣기
+    // x와 y가 64~127 사이라면 
+    // 클릭할 때마다 idx 올라감
+
+    int locationX = x / 64;
+    int locationY = y / 64;
+
+    PAINTSTRUCT ps;
+    cdc.RenderSprite(hdc, locationX * 64, locationY * 64, curTile);
+}
+
+bool init = false;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static CBitmap bitmap(hWnd, L"image.bmp");
     static CDC cdc(&bitmap);
-    static int idx = 0;
-
+    static int curTile = 0;
+    static int x = 0, y = 0;
+    
     switch (message)
     {
     case WM_CREATE:
-        SetTimer(hWnd, 0, 1000, NULL);
-        break;
-
-    case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // 메뉴 선택을 구문 분석합니다:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
-        }
-        break;
-
-    case WM_TIMER:
-        InvalidateRgn(hWnd, NULL, true);
         break;
     case WM_PAINT:
-        {
-            cdc.RenderSprite(hWnd, 100, 100, idx++ % 16);
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        if (!init) {
+            InitMap(hdc, cdc);
+            init = true;
+            break;
         }
+        PutRoad(cdc, hdc, x, y, curTile++ % 16);
+        EndPaint(hWnd, &ps);
+    }
+        break;
+
+    case WM_LBUTTONUP:
+        x = GET_X_LPARAM(lParam);
+        y = GET_Y_LPARAM(lParam);
+        
+        InvalidateRgn(hWnd, NULL, false);
+        
+        /*
+        WCHAR text[100];
+        wsprintf(text, L" x : %d \t y : %d", x, y);
+        TextOutW(hdc, x + 5, y, text, lstrlen(text));
+        */
         break;
     case WM_DESTROY:
-        KillTimer(hWnd, 0);
         PostQuitMessage(0);
         break;
     default:

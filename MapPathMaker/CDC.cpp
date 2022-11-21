@@ -30,13 +30,10 @@ void CDC::Render(HWND hWnd, long dx, long dy, float multiple)
 	EndPaint(hWnd, &ps);
 }
 
-void CDC::RenderSprite(HWND hWnd, int x, int y, int idx)
+void CDC::RenderSprite(HDC hdc, int x, int y, int idx)
 {
-	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(hWnd, &ps);
 
 	CSprite sprite = m_bitmap->GetSprites(idx);
 	BitBlt(hdc, x, y, sprite.GetHeight(), sprite.GetWidth(), m_bitmap->GetMemDC(), sprite.GetX(), sprite.GetY(), SRCCOPY);
 
-	EndPaint(hWnd, &ps);
 }
