@@ -181,7 +181,6 @@ void InitMap(HDC hdc, CDC cdc)
 
 void CheckAround(CDC cdc, HDC hdc, int locationX, int locationY)
 {
-    Tile curTileCheck = tileDirArr[map[locationY][locationX] - 1];
 
 
     for (int j = 0; j < 4; j++)
@@ -189,6 +188,8 @@ void CheckAround(CDC cdc, HDC hdc, int locationX, int locationY)
         if (locationY + checkDir[j].y < 0 || locationY + checkDir[j].y >= HEIGHT / 64 - 1
             || locationX + checkDir[j].x < 0 || locationX + checkDir[j].x >= WIDTH / 64 - 1)
             continue;
+
+        Tile curTileCheck = tileDirArr[map[locationY][locationX] - 1];
 
         if (map[locationY + checkDir[j].y][locationX + checkDir[j].x] - 1 != -1) // 빈공간이 아닌 경우
         {
