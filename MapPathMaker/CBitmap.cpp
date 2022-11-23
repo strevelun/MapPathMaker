@@ -46,7 +46,17 @@ CBitmap::CBitmap(HWND hWnd, LPCWSTR fileName)
     CloseHandle(m_hFile);
 }
 
-CSprite CBitmap::GetSprites(int idx)
+void CBitmap::RenderBit(HDC hdc)
 {
-    return m_sprites[idx];
+    BitBlt(hdc, 0, 0, m_width, m_height, m_hMemDC, 0, 0, SRCCOPY);
+}
+
+void CBitmap::RenderStretch(HDC hdc, long dx, long dy, float multiple)
+{
+    StretchBlt(hdc, dx, dy, m_width * multiple, m_height * multiple, m_hMemDC, 0, 0, m_width, m_height, SRCCOPY);
+}
+
+void CBitmap::RenderSprite(HDC hdc, int x, int y, int idx)
+{
+    BitBlt(hdc, x, y, m_sprites[idx].GetHeight(), m_sprites[idx].GetWidth(), m_hMemDC, m_sprites[idx].GetX(), m_sprites[idx].GetY(), SRCCOPY);
 }

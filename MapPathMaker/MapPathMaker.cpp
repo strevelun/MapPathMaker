@@ -4,6 +4,7 @@
 #include "framework.h"
 #include "MapPathMaker.h"
 #include "CBitmap.h"
+#include "CDC.h"
 
 #define MAX_LOADSTRING 100
 #define WIDTH           1000
@@ -107,6 +108,8 @@ typedef struct _tile
     int dirStatus;
 } Tile;
 
+// {타일번호, 연결부위}
+// 0000 -> 상우하좌
 Tile tileDirArr[16] = {
     {7, 1,}, //   0001   
     {11, 2}, //    0010    
@@ -182,13 +185,16 @@ void CheckAround(CDC cdc, HDC hdc, int locationX, int locationY, int j)
     cdc.RenderSprite(hdc, locationX * 64, locationY * 64, tileDirArr[dirStatus-1].tileNum);
 }
 
-void PutRoad(CDC cdc, HDC hdc, int x, int y, int curTile)
+void PutRoad(CDC cdc, HDC hdc, int x, int y)
 {
     if (x >= WIDTH-64 || y >= HEIGHT-64)
         return;
 
     int locationX = x / 64;
     int locationY = y / 64;
+
+    if (map[locationY][locationX] != 0)
+        return;
 
     int checkIdx = 0;
 
@@ -231,9 +237,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static CBitmap bitmap(hWnd, L"image.bmp");
     static CDC cdc(&bitmap);
-    static int curTile = 13;
-    static int x = 0, y = 0;
     static bool buttonClicked = false;
+    static int x = 0, y = 0;
 
     switch (message)
     {
@@ -250,7 +255,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         if (buttonClicked)
         {
-            //cdc.RenderSprite(hdc, WIDTH - 100, 0, curTile);
             buttonClicked = false;
             break;
         }
@@ -260,7 +264,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             init = true;
             break;
         }
-        PutRoad(cdc, hdc, x, y, curTile);
+        PutRoad(cdc, hdc, x, y);
         EndPaint(hWnd, &ps);
     }
         break;

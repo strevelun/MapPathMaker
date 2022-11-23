@@ -1,13 +1,13 @@
  #pragma once
 
-#include "CDC.h"
+#include "framework.h"
 
 class CSprite;
 
 class CBitmap
 {
-    HBITMAP			m_bitmap;
-    HANDLE			m_hFile;
+	HBITMAP			m_bitmap;
+	HANDLE			m_hFile;
 	LPDWORD			m_pixels = NULL;
 	HDC				m_hMemDC;
 
@@ -16,11 +16,10 @@ class CBitmap
 	CSprite* m_sprites;
 
 public:
+	CBitmap() {}
 	CBitmap(HWND hWnd, LPCWSTR fileName);
 
-	HDC GetMemDC() const { return m_hMemDC; }
-	long GetWidth() const { return m_width; }
-	long GetHeight() const { return m_height; }
-
-	CSprite GetSprites(int idx);
+	void RenderBit(HDC hdc);
+	void RenderStretch(HDC hdc, long dx, long dy, float multiple);
+	void RenderSprite(HDC hdc, int x, int y, int idx);
 };
