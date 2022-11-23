@@ -60,13 +60,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
-//
-//  함수: MyRegisterClass()
-//
-//  용도: 창 클래스를 등록합니다.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -88,16 +81,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   함수: InitInstance(HINSTANCE, int)
-//
-//   용도: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
-//
-//   주석:
-//
-//        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
-//        주 프로그램 창을 만든 다음 표시합니다.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
@@ -116,45 +99,31 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-//
-//  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  용도: 주 창의 메시지를 처리합니다.
-//
-//  WM_COMMAND  - 애플리케이션 메뉴를 처리합니다.
-//  WM_PAINT    - 주 창을 그립니다.
-//  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
-//
-//
-
 int map[HEIGHT / 64 - 1][WIDTH / 64 - 1] = { 0 };
 
 typedef struct _tile
 {
-    bool up, down, left, right;
-    int canChangeTo[3] = { -1, -1, -1 };
+    int tileNum;
+    int dirStatus;
 } Tile;
 
-
-Tile tileDirArr[15] = {
-    {true, true, true, true, {0,-1,-1}},
-    {false, true, true, true, {0,-1,-1}},
-    {true, true, true, false, {0,-1,-1}},
-    {false, true, true, false, {1,2,-1}},
-
-    {true, false, true, true, {0,-1,-1}},
-    {false, false, true, true, {1,4,-1}},
-    {true, false, true, false, {2,4,-1}},
-    {false, false, true, false, {3,5,6}},
-
-    {true, true, false, true, {0,-1,-1}},
-    {false, true, false, true, {1,8,-1}},
-    {true, true, false, false, {2,8,-1}},
-    {false, true, false, false, {3,9,10}},
-
-    {true, false, false, true, {4,8,-1}},
-    {false, false, false, true, {5,9,12}},
-    {true, false, false, false, {6,10,12}},
+Tile tileDirArr[16] = {
+    {7, 1,}, //   0001   
+    {11, 2}, //    0010    
+    {3, 3}, //    0011    
+    {13, 4}, //   0100   
+    {5, 5}, //    0101    
+    {9, 6}, //    0110    
+    {1, 7}, //    0111    
+    {14, 8}, //  1000   
+    {6, 9}, //    1001    
+    {10, 10}, //    1010   
+    {2, 11}, //    1011    
+    {12, 12}, //    1100   
+    {4, 13}, //    1101    
+    {8, 14}, //    1110    
+    {0, 15}, //     1111  
+    {-1, 16} // 10000 (16)
 };
 
 typedef struct _pos
@@ -175,176 +144,85 @@ void InitMap(HDC hdc, CDC cdc)
         for(int j=0; j<(HEIGHT / 64) - 1; j++)
             cdc.RenderSprite(hdc, i * 64, j * 64, 15);
 
-    map[5][5] = 5+1;
-    cdc.RenderSprite(hdc, 5 * 64, 5 * 64, 5);
+    map[5][5] = 13+1;
+    cdc.RenderSprite(hdc, 5 * 64, 5 * 64, 13);
 }
 
-void CheckAround(CDC cdc, HDC hdc, int locationX, int locationY)
+void CheckAround(CDC cdc, HDC hdc, int locationX, int locationY, int j)
 {
+    int dirStatus;
 
-
-    for (int j = 0; j < 4; j++)
-    {
-        if (locationY + checkDir[j].y < 0 || locationY + checkDir[j].y >= HEIGHT / 64 - 1
-            || locationX + checkDir[j].x < 0 || locationX + checkDir[j].x >= WIDTH / 64 - 1)
-            continue;
-
-        Tile curTileCheck = tileDirArr[map[locationY][locationX] - 1];
-
-        if (map[locationY + checkDir[j].y][locationX + checkDir[j].x] - 1 != -1) // 빈공간이 아닌 경우
+    for (int i = 0; i < 16; i++)
+        if (map[locationY][locationX] - 1 == tileDirArr[i].tileNum)
         {
-            Tile check = tileDirArr[map[locationY + checkDir[j].y][locationX + checkDir[j].x] - 1];
-
-            if (j == 0)
-            {
-                if (check.down == false && curTileCheck.up == true)
-                {
-                    for (int i = 0; i < 3 && check.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[check.canChangeTo[i]].down == true)
-                        {
-                            map[locationY + checkDir[j].y][locationX + checkDir[j].x] = check.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, (locationX + checkDir[j].x) * 64, (locationY + checkDir[j].y) * 64, check.canChangeTo[i]);
-
-                        }
-                    }
-                }
-                if (check.down == true && curTileCheck.up == false)
-                {
-                    for (int i = 0; i < 3 && curTileCheck.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[curTileCheck.canChangeTo[i]].up == true)
-                        {
-                            map[locationY][locationX] = curTileCheck.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, locationX * 64, locationY * 64, curTileCheck.canChangeTo[i]);
-                        }
-                    }
-                }
-            }
-            else if (j == 1)
-            {
-                if (check.left == false && curTileCheck.right == true)
-                {
-                    for (int i = 0; i < 3 && check.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[check.canChangeTo[i]].left == true)
-                        {
-                            map[locationY + checkDir[j].y][locationX + checkDir[j].x] = check.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, (locationX + checkDir[j].x) * 64, (locationY + checkDir[j].y) * 64, check.canChangeTo[i]);
-
-                        }
-                    }
-                }
-                if (check.left == true && curTileCheck.right == false)
-                {
-                    for (int i = 0; i < 3 && curTileCheck.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[curTileCheck.canChangeTo[i]].right == true)
-                        {
-                            map[locationY][locationX] = curTileCheck.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, locationX * 64, locationY * 64, curTileCheck.canChangeTo[i]);
-                        }
-                    }
-                }
-            }
-            else if (j == 2)
-            {
-                if (check.up == false && curTileCheck.down == true)
-                {
-                    for (int i = 0; i < 3 && check.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[check.canChangeTo[i]].up == true)
-                        {
-                            map[locationY + checkDir[j].y][locationX + checkDir[j].x] = check.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, (locationX + checkDir[j].x) * 64, (locationY + checkDir[j].y) * 64, check.canChangeTo[i]);
-
-                        }
-                    }
-                }
-                if (check.up == true && curTileCheck.down == false)
-                {
-                    for (int i = 0; i < 3 && curTileCheck.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[curTileCheck.canChangeTo[i]].down == true)
-                        {
-                            map[locationY][locationX] = curTileCheck.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, locationX * 64, locationY * 64, curTileCheck.canChangeTo[i]);
-                        }
-                    }
-                }
-            }
-            else if (j == 3)
-            {
-                if (check.right == false && curTileCheck.left == true)
-                {
-                    for (int i = 0; i < 3 && check.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[check.canChangeTo[i]].right == true)
-                        {
-                            map[locationY + checkDir[j].y][locationX + checkDir[j].x] = check.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, (locationX + checkDir[j].x) * 64, (locationY + checkDir[j].y) * 64, check.canChangeTo[i]);
-
-                        }
-                    }
-                }
-                if (check.right == true && curTileCheck.left == false)
-                {
-                    for (int i = 0; i < 3 && curTileCheck.canChangeTo[i] != -1; i++)
-                    {
-                        if (tileDirArr[curTileCheck.canChangeTo[i]].left == true)
-                        {
-                            map[locationY][locationX] = curTileCheck.canChangeTo[i] + 1;
-                            cdc.RenderSprite(hdc, locationX * 64, locationY * 64, curTileCheck.canChangeTo[i]);
-                        }
-                    }
-                }
-            }
+            dirStatus = tileDirArr[i].dirStatus;
+            break;
         }
-    }
+
+    // 만약 연결부위에 아무 타일이 없으면 그 방향은 삭제
+    if (map[locationY - 1][locationX] == 0)
+        dirStatus &= 7; // 0111
+    if (map[locationY][locationX + 1] == 0)
+        dirStatus &= 11; // 1011
+    if (map[locationY + 1][locationX] == 0)
+        dirStatus &= 13; // 1101
+    if (map[locationY][locationX - 1] == 0)
+        dirStatus &= 14; // 1110
+
+    if (j == 0) // 위쪽
+        dirStatus |= 2; // 0010
+    else if (j == 1) // 오른쪽
+        dirStatus |= 1; // 0001
+    else if (j == 2) // 아래
+        dirStatus |= 8; // 1000
+    else if (j == 3) // 왼쪽
+        dirStatus |= 4; // 0100
+
+    map[locationY][locationX] = tileDirArr[dirStatus-1].tileNum + 1;
+    cdc.RenderSprite(hdc, locationX * 64, locationY * 64, tileDirArr[dirStatus-1].tileNum);
 }
 
 void PutRoad(CDC cdc, HDC hdc, int x, int y, int curTile)
 {
-    // 마우스 누른 위치 좌표에 해당하는 칸에 스프라이트 넣기
-    // x와 y가 64~127 사이라면 
-    // 클릭할 때마다 idx 올라감
-
     if (x >= WIDTH-64 || y >= HEIGHT-64)
         return;
 
     int locationX = x / 64;
     int locationY = y / 64;
 
-    map[locationY][locationX] = curTile + 1; // 15번이 0으로 저장됨
+    int checkIdx = 0;
 
-    // 먼저 상하좌우 체크. 타일만 바뀌는 경우
-    cdc.RenderSprite(hdc, locationX * 64, locationY * 64, curTile);
-    CheckAround(cdc, hdc, locationX, locationY);
-   
-    // 상에 있는 타일의 down이 false이고 자신의 타일의 up이 true인 경우 상에 있는 타일 변경하는데 변경될 후보 중 down이 true인 것으로 변경
-    
-    /*
-    if (tileDirArr[map[locationY][locationX + 1] - 1].left == true) // 오른쪽 체크
+    for (int j = 0; j < 4; j++)
     {
+        if (locationY + checkDir[j].y < 0 || locationY + checkDir[j].y >= HEIGHT / 64 - 1
+            || locationX + checkDir[j].x < 0 || locationX + checkDir[j].x >= WIDTH / 64 - 1)
+            continue;
+        
+        if (map[locationY + checkDir[j].y][locationX + checkDir[j].x] != 0)
+        {
+            CheckAround(cdc, hdc, locationX + checkDir[j].x, locationY + checkDir[j].y, j);
 
-        curTile = tileDirArr[curTile].canChangeTo[0];
-        map[locationY][locationX] = curTile+1;
+            if (j == 0)
+                checkIdx |= 8; // 1000
+            else if (j == 1)
+                checkIdx |= 4; // 0100
+            else if (j == 2)
+                checkIdx |= 2; // 0010
+            else if (j == 3)
+                checkIdx |= 1; // 0001
+        }
     }
-    */
 
-    // 주변 확인하고 내가 놓을 타일이 올바른 모양인지 체크
+    if (checkIdx == 0) // 도로가 연결되지 않은 빈공간 클릭하면
+    {
+        checkIdx = 16;
+        map[locationY][locationX] = tileDirArr[checkIdx - 1].tileNum + 1;
+        cdc.RenderSprite(hdc, locationX * 64, locationY * 64, 15);
+        return;
+    }
 
-    // 스프라이트를 놓았으면 상하좌우를 확인
-    // 만약 3번 위에 7번을 놓았으면 하단을 체크할 때 제일 먼저 3번 입장에서 7번이 무시할 놈인지 판단.
-    // 각 타일마다 고유의 상하좌우 flag. 이 flag는 각 타일이 어느 방향에서 놓으면 바뀔 수 있는지 알려줌.
-    // 예를들어 1번은 up=true이기 때문에 1번의 위쪽에 놓은 타일의 down=true가 되어야 한다.
-    // 만약 7번이 있고 7번 위에 3번을 놓았으면 7번이 바뀔 수 있는 후보를 살핀다. 3번과 5번은 up이 false이기 때문에 탈락.
-
-    // 1. 1번 타일 위에 0번 타일을 놓는다.
-    // 2. 아래를 살피는데, 1번이기 때문에 tileDirArr[1].up을 본다. 1번 타일의 up은 false이고, 0번 타일의 down은 true이기 때문에 
-
-    // 3번 왼쪽에 2번을 놓으면 0이 되어야 한다.
-
+    map[locationY][locationX] = tileDirArr[checkIdx-1].tileNum + 1;
+    cdc.RenderSprite(hdc, locationX * 64, locationY * 64, tileDirArr[checkIdx-1].tileNum);
 }
 
 bool init = false;
@@ -353,27 +231,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static CBitmap bitmap(hWnd, L"image.bmp");
     static CDC cdc(&bitmap);
-    static int curTile = 0;
+    static int curTile = 13;
     static int x = 0, y = 0;
-    
+    static bool buttonClicked = false;
+
     switch (message)
     {
     case WM_CREATE:
         break;
     case WM_RBUTTONUP:
-        curTile = ++curTile % 16;
+        buttonClicked = true;
+        InvalidateRgn(hWnd, NULL, false);
         break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
+
+        if (buttonClicked)
+        {
+            //cdc.RenderSprite(hdc, WIDTH - 100, 0, curTile);
+            buttonClicked = false;
+            break;
+        }
+
         if (!init) {
             InitMap(hdc, cdc);
             init = true;
             break;
         }
         PutRoad(cdc, hdc, x, y, curTile);
-        //PutRoad(cdc, hdc, x, y, 8);
         EndPaint(hWnd, &ps);
     }
         break;
@@ -384,11 +271,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         
         InvalidateRgn(hWnd, NULL, false);
         
-        /*
-        WCHAR text[100];
-        wsprintf(text, L" x : %d \t y : %d", x, y);
-        TextOutW(hdc, x + 5, y, text, lstrlen(text));
-        */
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
